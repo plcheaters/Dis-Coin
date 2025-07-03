@@ -1,132 +1,575 @@
-// Extended and enhanced version of Dis-Coin website
-// Includes animation effects, longer component logic, tooltips, and Discord UI influence
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dis-Coin</title>
+  <style>
+    /* =========== BASE DARK THEME =========== */
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
-import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import {
-  LucideLayoutDashboard,
-  LucideUsers,
-  LucideSettings,
-  LucideShoppingCart,
-  LucideLogOut,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import "tailwindcss/tailwind.css";
+    :root {
+      --discord-blurple: #5865f2;
+      --discord-blurple-hover: #4752c4;
+      --discord-dark-bg: #18191c;
+      --discord-darker-bg: #121212;
+      --discord-gray: #b9bbbe;
+      --discord-dark-gray: #2f3136;
+      --discord-red: #ed4245;
+      --text-white: #fff;
+    }
 
-const Tooltip = ({ message }) => (
-  <div className="absolute bottom-full mb-2 w-max bg-black text-white text-xs py-1 px-2 rounded opacity-75">
-    {message}
-  </div>
-);
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
 
-const Sidebar = () => {
-  const [hover, setHover] = useState(null);
-  return (
-    <div className="w-64 min-h-screen bg-[#2B2D31] text-white p-6 fixed flex flex-col justify-between shadow-xl">
-      <div>
-        <h1 className="text-3xl font-bold text-[#5865F2] mb-8">Dis-Coin</h1>
-        <nav className="space-y-4 relative">
-          <div className="relative" onMouseEnter={() => setHover('dashboard')} onMouseLeave={() => setHover(null)}>
-            {hover === 'dashboard' && <Tooltip message="View stats and summary" />}
-            <Link to="/dashboard">
-              <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#5865F2]/30">
-                <LucideLayoutDashboard className="mr-2" /> Dashboard
-              </Button>
-            </Link>
-          </div>
-          <div className="relative" onMouseEnter={() => setHover('referrals')} onMouseLeave={() => setHover(null)}>
-            {hover === 'referrals' && <Tooltip message="Referral tracking" />}
-            <Link to="/referrals">
-              <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#5865F2]/30">
-                <LucideUsers className="mr-2" /> Referrals
-              </Button>
-            </Link>
-          </div>
-          <div className="relative" onMouseEnter={() => setHover('orders')} onMouseLeave={() => setHover(null)}>
-            {hover === 'orders' && <Tooltip message="Create and manage orders" />}
-            <Link to="/orders">
-              <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#5865F2]/30">
-                <LucideShoppingCart className="mr-2" /> Orders
-              </Button>
-            </Link>
-          </div>
-          <div className="relative" onMouseEnter={() => setHover('settings')} onMouseLeave={() => setHover(null)}>
-            {hover === 'settings' && <Tooltip message="Customize your experience" />}
-            <Link to="/settings">
-              <Button variant="ghost" className="w-full justify-start text-white hover:bg-[#5865F2]/30">
-                <LucideSettings className="mr-2" /> Settings
-              </Button>
-            </Link>
-          </div>
-        </nav>
-      </div>
-      <div className="text-xs text-gray-400 flex items-center justify-between">
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--discord-dark-bg);
+      color: var(--text-white);
+      overflow-x: hidden;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    /* =========== LAYOUT =========== */
+    #app {
+      display: flex;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    nav.sidebar {
+      width: 280px;
+      background-color: var(--discord-darker-bg);
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 1.5rem;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      box-shadow: 4px 0 10px rgba(0,0,0,0.7);
+      z-index: 1000;
+      transition: background-color 0.3s ease;
+    }
+
+    nav.sidebar h1.logo {
+      font-weight: 900;
+      font-size: 2.5rem;
+      color: var(--discord-blurple);
+      margin-bottom: 3rem;
+      user-select: text;
+      letter-spacing: 0.1em;
+    }
+
+    nav.sidebar button.nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      border: none;
+      background: none;
+      padding: 0.75rem 1rem;
+      color: var(--discord-gray);
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.25s ease, color 0.25s ease;
+      position: relative;
+    }
+
+    nav.sidebar button.nav-btn:hover,
+    nav.sidebar button.nav-btn.active {
+      background-color: var(--discord-blurple);
+      color: var(--text-white);
+      box-shadow: 0 0 8px var(--discord-blurple);
+    }
+
+    nav.sidebar button.nav-btn svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      stroke-width: 1.5;
+    }
+
+    nav.sidebar .bottom {
+      margin-top: auto;
+      font-size: 0.8rem;
+      color: var(--discord-gray);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    nav.sidebar .bottom button.logout-btn {
+      background: none;
+      border: none;
+      color: var(--discord-red);
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      transition: background-color 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    nav.sidebar .bottom button.logout-btn:hover {
+      background-color: rgba(237, 66, 69, 0.2);
+    }
+
+    /* Main content */
+    main.content {
+      margin-left: 280px;
+      padding: 3rem 4rem;
+      flex-grow: 1;
+      background: var(--discord-dark-bg);
+      min-height: 100vh;
+      overflow-y: auto;
+      animation: fadeIn 0.7s ease forwards;
+    }
+
+    /* =========== LANDING PAGE =========== */
+    section.landing {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      user-select: text;
+    }
+
+    section.landing h1.title {
+      font-size: 6rem;
+      font-weight: 900;
+      color: var(--discord-blurple);
+      margin: 0 0 1rem;
+      animation: scaleIn 0.8s ease forwards;
+    }
+
+    section.landing p.subtitle {
+      font-size: 1.8rem;
+      color: var(--discord-gray);
+      margin: 0 0 3rem;
+      animation: fadeInUp 1s ease forwards;
+    }
+
+    section.landing button.get-started {
+      background-color: var(--discord-blurple);
+      border: none;
+      padding: 1rem 3rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-white);
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 6px 12px rgba(88, 101, 242, 0.6);
+      transition: background-color 0.3s ease, transform 0.15s ease;
+      animation: fadeInUp 1.2s ease forwards;
+    }
+
+    section.landing button.get-started:hover {
+      background-color: var(--discord-blurple-hover);
+      transform: scale(1.05);
+    }
+
+    section.landing button.get-started:active {
+      transform: scale(0.95);
+    }
+
+    /* =========== DASHBOARD PAGE =========== */
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      user-select: text;
+    }
+
+    .dashboard .card {
+      background-color: var(--discord-darker-bg);
+      border-radius: 15px;
+      padding: 2rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      text-align: center;
+      transition: transform 0.3s ease;
+      position: relative;
+      cursor: default;
+    }
+
+    .dashboard .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 8px 24px rgba(88, 101, 242, 0.5);
+    }
+
+    .dashboard .card h3 {
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      color: var(--discord-gray);
+      font-weight: 600;
+    }
+
+    .dashboard .card .value {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--discord-blurple);
+    }
+
+    /* =========== ORDERS PAGE =========== */
+    .orders {
+      max-width: 700px;
+      margin: 0 auto;
+      user-select: text;
+    }
+
+    .orders h2 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--discord-blurple);
+      margin-bottom: 1.5rem;
+    }
+
+    form.order-form {
+      background-color: var(--discord-darker-bg);
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    form.order-form label {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--discord-gray);
+    }
+
+    form.order-form input[type="number"] {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      border: none;
+      background-color: var(--discord-dark-gray);
+      color: var(--text-white);
+      font-size: 1.1rem;
+    }
+
+    form.order-form button {
+      background-color: var(--discord-blurple);
+      border: none;
+      color: var(--text-white);
+      font-weight: 700;
+      font-size: 1.2rem;
+      padding: 1rem 0;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 6px 12px rgba(88, 101, 242, 0.6);
+      transition: background-color 0.3s ease, transform 0.15s ease;
+    }
+
+    form.order-form button:hover {
+      background-color: var(--discord-blurple-hover);
+      transform: scale(1.05);
+    }
+
+    form.order-form button:active {
+      transform: scale(0.95);
+    }
+
+    /* =========== REFERRALS PAGE =========== */
+    .referrals {
+      max-width: 700px;
+      margin: 0 auto;
+      user-select: text;
+    }
+
+    .referrals h2 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--discord-blurple);
+      margin-bottom: 1.5rem;
+    }
+
+    .referral-code {
+      background-color: var(--discord-darker-bg);
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1.3rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+      user-select: all;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(88, 101, 242, 0.8);
+    }
+
+    .referrals .stats {
+      background-color: var(--discord-darker-bg);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      display: flex;
+      justify-content: space-around;
+      gap: 1rem;
+      user-select: text;
+    }
+
+    .referrals .stats div {
+      text-align: center;
+      color: var(--discord-gray);
+    }
+
+    .referrals .stats div .number {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--discord-blurple);
+    }
+
+    /* =========== SETTINGS PAGE =========== */
+    .settings {
+      max-width: 700px;
+      margin: 0 auto;
+      user-select: text;
+    }
+
+    .settings h2 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--discord-blurple);
+      margin-bottom: 1.5rem;
+    }
+
+    .settings p {
+      font-size: 1.1rem;
+      color: var(--discord-gray);
+      line-height: 1.6;
+    }
+
+    /* =========== TOOLTIP =========== */
+    .tooltip {
+      position: absolute;
+      background-color: #000;
+      color: #fff;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      z-index: 10000;
+    }
+
+    .tooltip.show {
+      opacity: 0.75;
+      pointer-events: auto;
+    }
+
+    /* =========== ANIMATIONS =========== */
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+
+    @keyframes scaleIn {
+      from {opacity: 0; transform: scale(0.7);}
+      to {opacity: 1; transform: scale(1);}
+    }
+
+    @keyframes fadeInUp {
+      from {opacity: 0; transform: translateY(12px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    /* =========== RESPONSIVE =========== */
+    @media (max-width: 768px) {
+      nav.sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        padding: 1rem 1rem;
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        box-shadow: none;
+        justify-content: space-around;
+      }
+
+      main.content {
+        margin-left: 0;
+        padding: 2rem 1rem;
+      }
+
+      section.landing h1.title {
+        font-size: 3rem;
+      }
+
+      section.landing p.subtitle {
+        font-size: 1rem;
+      }
+
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      form.order-form {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <nav class="sidebar" aria-label="Main navigation">
+      <h1 class="logo" tabindex="0">Dis-Coin</h1>
+      <button class="nav-btn active" data-page="landing" aria-current="page" title="Home dashboard">🏠 Dashboard</button>
+      <button class="nav-btn" data-page="referrals" title="Referral tracking">👥 Referrals</button>
+      <button class="nav-btn" data-page="orders" title="Create and manage orders">🛒 Orders</button>
+      <button class="nav-btn" data-page="settings" title="Customize your experience">⚙️ Settings</button>
+      <div class="bottom">
         <span>© 2025 Dis-Coin</span>
-        <Button variant="ghost" size="sm" className="text-red-400 hover:bg-red-800/30">
-          <LucideLogOut className="w-4 h-4 mr-1" /> Log out
-        </Button>
+        <button class="logout-btn" title="Log out">⏻ Log out</button>
       </div>
-    </div>
-  );
-};
+    </nav>
 
-const LandingPage = () => {
-  const navigate = useNavigate();
-  useEffect(() => {
-    document.title = "Dis-Coin | Welcome";
-  }, []);
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.8 }}
-      className="flex flex-col items-center justify-center min-h-screen bg-[#1e1f22] text-white"
-    >
-      <motion.h1
-        initial={{ scale: 0.8 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.3 }}
-        className="text-6xl font-extrabold text-[#5865F2] mb-4"
-      >
-        Dis-Coin
-      </motion.h1>
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6 }}
-        className="text-lg text-gray-300 mb-6"
-      >
-        Get real free members today
-      </motion.p>
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => navigate("/dashboard")}
-        className="bg-[#5865F2] text-white px-6 py-3 rounded-xl font-semibold shadow-md hover:bg-[#4752c4] transition-all"
-      >
-        Get Started
-      </motion.button>
-    </motion.div>
-  );
-};
+    <main class="content" role="main">
+      <!-- Landing Page -->
+      <section class="landing page" aria-label="Landing page">
+        <h1 class="title">Dis-Coin</h1>
+        <p class="subtitle">Get real free members today</p>
+        <button class="get-started" aria-label="Get started with Dis-Coin">Get Started</button>
+      </section>
 
-// All pages (Dashboard, Orders, Referrals, Settings) will remain intact for brevity in this section.
-// You can scroll down or ask to extend the rest with similar animations, tooltips, responsiveness, and feature expansion.
+      <!-- Dashboard Page -->
+      <section class="dashboard page" style="display:none" aria-label="Dashboard">
+        <div class="card">
+          <h3>Total Coins</h3>
+          <div class="value" id="totalCoins">0</div>
+        </div>
+        <div class="card">
+          <h3>Active Referrals</h3>
+          <div class="value" id="activeReferrals">0</div>
+        </div>
+        <div class="card">
+          <h3>Active Orders</h3>
+          <div class="value" id="activeOrders">0</div>
+        </div>
+      </section>
 
-// Routes setup
-const App = () => (
-  <Router>
-    <Sidebar />
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/orders" element={<Orders />} />
-      <Route path="/referrals" element={<Referrals />} />
-      <Route path="/settings" element={<Settings />} />
-    </Routes>
-  </Router>
-);
+      <!-- Referrals Page -->
+      <section class="referrals page" style="display:none" aria-label="Referrals">
+        <h2>Referral Program</h2>
+        <div class="referral-code" tabindex="0" title="Your referral code">REF-C12345</div>
+        <div class="stats">
+          <div>
+            <div class="number" id="refCount">0</div>
+            <div>Referred Members</div>
+          </div>
+          <div>
+            <div class="number" id="refBonus">0</div>
+            <div>Bonus Coins</div>
+          </div>
+        </div>
+      </section>
 
-export default App;
+      <!-- Orders Page -->
+      <section class="orders page" style="display:none" aria-label="Orders">
+        <h2>Place an Order</h2>
+        <form class="order-form" aria-label="Place order form">
+          <label for="orderQuantity">Quantity</label>
+          <input type="number" id="orderQuantity" name="orderQuantity" min="1" max="1000" value="1" required />
+          <button type="submit">Order Now</button>
+        </form>
+        <div id="orderMessage" aria-live="polite" style="margin-top:1rem; font-weight: 700;"></div>
+      </section>
+
+      <!-- Settings Page -->
+      <section class="settings page" style="display:none" aria-label="Settings">
+        <h2>Settings</h2>
+        <p>Customize your Dis-Coin experience here. (Coming Soon!)</p>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Simple SPA navigation
+    const buttons = document.querySelectorAll('nav.sidebar button.nav-btn');
+    const pages = document.querySelectorAll('main.content section.page');
+    const getStartedBtn = document.querySelector('.get-started');
+
+    function showPage(pageName) {
+      pages.forEach(page => {
+        page.style.display = page.classList.contains(pageName) ? 'block' : 'none';
+      });
+
+      buttons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.page === pageName);
+        btn.setAttribute('aria-current', btn.dataset.page === pageName ? 'page' : false);
+      });
+
+      document.title = pageName === 'landing' ? 'Dis-Coin | Welcome' : `Dis-Coin | ${pageName.charAt(0).toUpperCase() + pageName.slice(1)}`;
+    }
+
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        showPage(button.dataset.page);
+      });
+    });
+
+    getStartedBtn.addEventListener('click', () => {
+      showPage('dashboard');
+    });
+
+    // Initial page
+    showPage('landing');
+
+    // Fake data for demo
+    let totalCoins = 5421;
+    let activeReferrals = 321;
+    let activeOrders = 15;
+    let referralCount = 321;
+    let referralBonus = 1598;
+
+    // Update dashboard & referrals
+    document.getElementById('totalCoins').textContent = totalCoins;
+    document.getElementById('activeReferrals').textContent = activeReferrals;
+    document.getElementById('activeOrders').textContent = activeOrders;
+    document.getElementById('refCount').textContent = referralCount;
+    document.getElementById('refBonus').textContent = referralBonus;
+
+    // Order form handling
+    const orderForm = document.querySelector('form.order-form');
+    const orderMessage = document.getElementById('orderMessage');
+
+    orderForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const qty = parseInt(orderForm.orderQuantity.value, 10);
+      if (qty > 0) {
+        orderMessage.textContent = `Order placed for ${qty} coins! 🎉`;
+        orderMessage.style.color = 'var(--discord-blurple)';
+        orderForm.reset();
+      } else {
+        orderMessage.textContent = 'Please enter a valid quantity.';
+        orderMessage.style.color = 'var(--discord-red)';
+      }
+    });
+
+    // Logout button demo
+    document.querySelector('.logout-btn').addEventListener('click', () => {
+      alert('Logging out...');
+      // Add your logout logic here
+    });
+  </script>
+</body>
+</html>
+
