@@ -1,91 +1,99 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
 
-const Home = () => (
-  <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
-    <h1 className="text-5xl font-bold mb-4">Dis-Coin</h1>
-    <p className="text-sm mb-8">Get real free members today</p>
-    <Link to="/dashboard">
-      <Button className="text-lg px-6 py-3">Get Started</Button>
-    </Link>
+const Sidebar = () => (
+  <div className="w-64 min-h-screen bg-gray-900 text-white p-4 space-y-4 fixed">
+    <h1 className="text-2xl font-bold mb-4">Dis-Coin</h1>
+    <Link to="/dashboard"><Button variant="ghost" className="w-full">Dashboard</Button></Link>
+    <Link to="/referrals"><Button variant="ghost" className="w-full">Referrals</Button></Link>
+    <Link to="/orders"><Button variant="ghost" className="w-full">Orders</Button></Link>
+    <Link to="/settings"><Button variant="ghost" className="w-full">Settings</Button></Link>
   </div>
 );
 
-const Sidebar = () => (
-  <div className="w-64 bg-gray-800 text-white min-h-screen p-4 space-y-4">
-    <Link to="/dashboard"><Button className="w-full">Dashboard</Button></Link>
-    <Link to="/referrals"><Button className="w-full">Referrals</Button></Link>
-    <Link to="/orders"><Button className="w-full">Orders</Button></Link>
-    <Link to="/settings"><Button className="w-full">Settings</Button></Link>
+const LandingPage = () => (
+  <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <Card className="p-6 text-center shadow-xl">
+      <h1 className="text-4xl font-bold">Dis-Coin</h1>
+      <p className="text-sm mt-2">Get real free members today</p>
+      <Button className="mt-6" onClick={() => window.location.href = "/dashboard"}>Get Started</Button>
+    </Card>
   </div>
 );
 
 const Dashboard = () => (
-  <div className="p-6 grid grid-cols-3 gap-6">
-    <Card><CardContent><p>Dis-Coins:</p><h2 className="text-xl">100</h2></CardContent></Card>
-    <Card><CardContent><p>Referrals:</p><h2 className="text-xl">5</h2></CardContent></Card>
-    <Card><CardContent><p>Active Orders:</p><h2 className="text-xl">2</h2></CardContent></Card>
+  <div className="ml-64 p-6">
+    <h2 className="text-2xl font-bold mb-4">Dashboard</h2>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <Card><CardContent>Dis-Coins: <strong>120</strong></CardContent></Card>
+      <Card><CardContent>Referrals: <strong>5</strong></CardContent></Card>
+      <Card><CardContent>Active Orders: <strong>2</strong></CardContent></Card>
+    </div>
   </div>
 );
 
-const Orders = () => (
-  <div className="p-6">
-    <h2 className="text-2xl mb-4">Create an Order</h2>
-    <p>Minimum order price: 10 Dis-Coin</p>
-    <p>Maximum Member Order: 100</p>
-    <p>Price increases by 2 Dis-Coins per member</p>
-  </div>
-);
+const Orders = () => {
+  const maxMembers = 100; // Assume 100 registered users
+  const [members, setMembers] = useState(1);
+  const price = members * 2;
 
-const Referrals = () => {
-  const referralCode = `https://dis-coin.com/ref/${Math.random().toString(36).substring(2, 8)}`;
   return (
-    <div className="p-6 space-y-4">
-      <h2 className="text-2xl">Your Referral Code</h2>
-      <Card><CardContent><p>{referralCode}</p></CardContent></Card>
-      <h2 className="text-2xl">Referral Clicks</h2>
-      <Card><CardContent><p>Clicks: 12</p><p>Logins: 4</p></CardContent></Card>
+    <div className="ml-64 p-6">
+      <h2 className="text-2xl font-bold mb-4">Orders</h2>
+      <Card className="p-4 mb-6">
+        <h3 className="text-lg font-semibold">Create an Order</h3>
+        <p>Minimum order price: 10 Dis-Coin</p>
+        <p>Maximum Member Order: {maxMembers}</p>
+        <Input
+          type="number"
+          min="1"
+          max={maxMembers}
+          value={members}
+          onChange={(e) => setMembers(Number(e.target.value))}
+          className="my-2"
+        />
+        <p>Price: {price} Dis-Coin</p>
+        <Button disabled={price < 10}>Place Order</Button>
+      </Card>
     </div>
   );
 };
 
+const Referrals = () => (
+  <div className="ml-64 p-6">
+    <h2 className="text-2xl font-bold mb-4">Referrals</h2>
+    <Card className="p-4 mb-6">
+      <h3 className="font-semibold mb-2">Your Referral Code:</h3>
+      <Input value="https://dis-coin.com/ref/abc123" readOnly />
+    </Card>
+    <Card className="p-4">
+      <h3 className="font-semibold mb-2">Referral Clicks & Logins</h3>
+      <p>Clicks: 23</p>
+      <p>Logins: 11</p>
+    </Card>
+  </div>
+);
+
 const Settings = () => (
-  <div className="p-6">
-    <h2 className="text-2xl">Settings</h2>
-    <p>Coming soon...</p>
+  <div className="ml-64 p-6">
+    <h2 className="text-2xl font-bold mb-4">Settings</h2>
+    <p>Other settings go here.</p>
   </div>
 );
 
 const App = () => (
   <Router>
+    <Sidebar />
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/dashboard" element={
-        <div className="flex">
-          <Sidebar />
-          <Dashboard />
-        </div>
-      } />
-      <Route path="/orders" element={
-        <div className="flex">
-          <Sidebar />
-          <Orders />
-        </div>
-      } />
-      <Route path="/referrals" element={
-        <div className="flex">
-          <Sidebar />
-          <Referrals />
-        </div>
-      } />
-      <Route path="/settings" element={
-        <div className="flex">
-          <Sidebar />
-          <Settings />
-        </div>
-      } />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/orders" element={<Orders />} />
+      <Route path="/referrals" element={<Referrals />} />
+      <Route path="/settings" element={<Settings />} />
     </Routes>
   </Router>
 );
