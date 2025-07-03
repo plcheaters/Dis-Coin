@@ -1,0 +1,105 @@
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+
+const Home = () => (
+  <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
+    <h1 className="text-5xl font-bold mb-4">Dis-Coin</h1>
+    <p className="text-sm mb-8">Get real free members today</p>
+    <a href="/dashboard">
+      <Button className="text-lg px-6 py-3">Get Started</Button>
+    </a>
+  </div>
+);
+
+const Sidebar = () => (
+  <div className="w-64 bg-gray-800 text-white min-h-screen p-4 space-y-4">
+    <Link to="/dashboard"><Button className="w-full">Dashboard</Button></Link>
+    <Link to="/referrals"><Button className="w-full">Referrals</Button></Link>
+    <Link to="/orders"><Button className="w-full">Orders</Button></Link>
+    <Link to="/settings"><Button className="w-full">Settings</Button></Link>
+  </div>
+);
+
+const Dashboard = () => (
+  <div className="p-6 grid grid-cols-3 gap-6">
+    <Card><CardContent><p>Dis-Coins:</p><h2 className="text-xl">100</h2></CardContent></Card>
+    <Card><CardContent><p>Referrals:</p><h2 className="text-xl">5</h2></CardContent></Card>
+    <Card><CardContent><p>Active Orders:</p><h2 className="text-xl">2</h2></CardContent></Card>
+  </div>
+);
+
+const Orders = () => (
+  <div className="p-6">
+    <h2 className="text-2xl mb-4">Create an Order</h2>
+    <p>Minimum order price: 10 Dis-Coin</p>
+    <p>Maximum Member Order: 100</p>
+    <p>Price increases by 2 Dis-Coins per member</p>
+  </div>
+);
+
+const Referrals = () => {
+  const referralCode = `https://dis-coin.com/ref/${Math.random().toString(36).substring(2, 8)}`;
+  return (
+    <div className="p-6 space-y-4">
+      <h2 className="text-2xl">Your Referral Code</h2>
+      <Card><CardContent><p>{referralCode}</p></CardContent></Card>
+      <h2 className="text-2xl">Referral Clicks</h2>
+      <Card><CardContent><p>Clicks: 12</p><p>Logins: 4</p></CardContent></Card>
+    </div>
+  );
+};
+
+const Settings = () => (
+  <div className="p-6">
+    <h2 className="text-2xl">Settings</h2>
+    <p>Coming soon...</p>
+  </div>
+);
+
+const App = () => (
+  <Router>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route
+        path="/dashboard"
+        element={
+          <div className="flex">
+            <Sidebar />
+            <Dashboard />
+          </div>
+        }
+      />
+      <Route
+        path="/orders"
+        element={
+          <div className="flex">
+            <Sidebar />
+            <Orders />
+          </div>
+        }
+      />
+      <Route
+        path="/referrals"
+        element={
+          <div className="flex">
+            <Sidebar />
+            <Referrals />
+          </div>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <div className="flex">
+            <Sidebar />
+            <Settings />
+          </div>
+        }
+      />
+    </Routes>
+  </Router>
+);
+
+export default App;
